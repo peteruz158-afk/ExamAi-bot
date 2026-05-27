@@ -68,8 +68,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(ai_reply)
 
     except Exception as e:
+
+     print(f"GROQ ERROR: {e}")
         await update.message.reply_text(
-            "My bad bruv, something went wrong. Try again in a sec 🙏"
+            f"Error: {str(e)}"
         )
 
 # Run the bot
