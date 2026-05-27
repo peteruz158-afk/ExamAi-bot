@@ -1,3 +1,4 @@
+import os
 import logging
 from telegram import Update
 from telegram.ext import (
@@ -10,13 +11,14 @@ from telegram.ext import (
 from groq import Groq
 
 # Your keys — paste them here
-TELEGRAM_TOKEN = "8987511434:AAHIWZUzQX68ZWi97Vf0Tz-4jDIiruwP8wU"
-GROQ_API_KEY = "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"
+
+TELEGRAM_TOKEN = os.environ.get("8987511434:AAHIWZUzQX68ZWi97Vf0Tz-4jDIiruwP8wU")
+GROQ_API_KEY = os.environ.get("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
 
 # Setup Groq
 client = Groq(api_key=GROQ_API_KEY)
 
-SYSTEM_PROMPT = """You are WaecAI, an AI tutor specifically for Nigerian WAEC and JAMB students.
+SYSTEM_PROMPT = """You are yourAI, an AI tutor specifically for Nigerian WAEC and JAMB students.
 Explain concepts simply using Nigerian examples and analogies students relate to.
 Break down past questions step by step clearly.
 Be encouraging, friendly and patient.
@@ -28,7 +30,7 @@ logging.basicConfig(level=logging.INFO)
 # /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "👋 Yo! I'm WaecAI — your personal WAEC and JAMB tutor.\n\n"
+        "👋 Yo! I'm EXAMAI — your personal WAEC and JAMB tutor.\n\n"
         "Ask me anything — past questions, topic explanations, "
         "whatever you need. I got you 💪\n\n"
         "Just type your question and let's go!"
