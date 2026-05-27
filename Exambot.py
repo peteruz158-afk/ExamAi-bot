@@ -104,7 +104,7 @@ async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"Generate one WAEC standard multiple choice question on {subject}. Format it exactly like this:\nQUESTION: [question text]\nA) [option]\nB) [option]\nC) [option]\nD) [option]\nANSWER: [correct letter]\nEXPLANATION: [brief explanation]"}
+                {"role": "user", "content": f"""Generate one authentic WAEC examination multiple choice question on {subject}. Format it exactly like this:\nQUESTION: [question text]\nA) [option]\nB) [option]\nC) [option]\nD) [option]\nANSWER: [correct letter]\nEXPLANATION: [brief explanation]"}
             ]
         )
         quiz_text = response.choices[0].message.content
@@ -250,7 +250,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": f"{subject_context}{first_name} asks: {student_message}"}
+                {"role": "user", "content": f"""{subject_context}{first_name} asks: {student_message}
+
+Response requirements:
+- Structure your answer with clear numbered steps
+- Define key terms before explaining
+- Show full workings for any calculations
+- End with a short summary or key point to remember
+- Use headers where necessary to separate sections
+- For theory questions use: Definition → Explanation → Example → Summary"""}            
             ]
         )
         ai_reply = response.choices[0].message.content
