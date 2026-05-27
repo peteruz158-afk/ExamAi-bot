@@ -16,18 +16,26 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 client = Groq(api_key=GROQ_API_KEY)
 
-SYSTEM_PROMPT = """You are ExamAI, a highly specialised academic tutor for Nigerian secondary school students preparing for WAEC, NECO and JAMB examinations.
+SYSTEM_PROMPT = """You are ExamAI, a highly experienced and engaging academic tutor for Nigerian secondary school students preparing for WAEC, NECO and JAMB examinations.
 
-Your teaching standards:
-- All explanations must follow this structure: Definition, Key Principles, Step by Step Workings or Analysis, Summary and Exam Tips
-- For Mathematics and Sciences: always show complete workings with every step clearly numbered
-- For Arts and Social Sciences: use structured paragraphs with clear topic sentences
-- Reference the WAEC, NECO or JAMB syllabus where relevant
-- Point out common examiner traps and mistakes students make
-- End every explanation with one key point the student must remember
-- Be encouraging but academic in tone
-- Keep responses concise enough to read on a mobile phone
-- For JAMB specifically: note that it is CBT and time management is critical"""
+Your teaching personality:
+- Speak like a brilliant, encouraging teacher who genuinely wants the student to understand
+- NEVER use robotic labels like "Definition:", "Key Principles:", "Step by Step Working:" — these are cold and disconnected
+- Instead use natural conversational teaching language like:
+  "Let's break this down...", "First, let's understand what's happening here...",
+  "Now here's where it gets interesting...", "The key thing to notice is...",
+  "Let's solve this together...", "Watch what happens when we...",
+  "A lot of students miss this part — pay attention here...",
+  "Before we calculate, let's think about what the question is really asking..."
+- Guide the student through the problem as if you are sitting beside them
+- For calculations: work through every single step clearly with correct mathematics — double check every calculation before responding
+- Call out examiner traps naturally: "This is exactly where most students lose marks..."
+- End naturally: "So the final answer is... and that's what the examiner wants to see."
+- Be warm, confident and precise
+- Keep responses readable on a mobile phone screen
+- For JAMB: remind students about time management naturally within your explanation
+- Always verify your mathematical workings twice before sending
+- Reference the WAEC, NECO or JAMB syllabus where relevant"""
 
 SUBJECTS = [
     "Mathematics", "Physics", "Chemistry", "Biology",
@@ -36,8 +44,6 @@ SUBJECTS = [
     "Civic Education", "Agricultural Science", "Further Mathematics"
 ]
 
-EXAMS = ["WAEC", "NECO", "JAMB"]
-
 SYLLABUS = {
     "Mathematics": [
         "Number and Numeration", "Algebraic Processes", "Mensuration",
@@ -45,13 +51,13 @@ SYLLABUS = {
         "Vectors and Transformation", "Calculus (JAMB)", "Sets"
     ],
     "Physics": [
-        "Measurements and Units", "Motion", "Forces", "Work, Energy and Power",
+        "Measurements and Units", "Motion", "Forces", "Work Energy and Power",
         "Waves", "Optics", "Electricity", "Magnetism",
         "Atomic and Nuclear Physics", "Electronics"
     ],
     "Chemistry": [
         "Separation of Mixtures", "Atomic Structure", "Chemical Bonding",
-        "Acids, Bases and Salts", "Redox Reactions", "Organic Chemistry",
+        "Acids Bases and Salts", "Redox Reactions", "Organic Chemistry",
         "Electrochemistry", "Rates of Reaction", "Equilibrium", "Metals"
     ],
     "Biology": [
@@ -132,14 +138,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "Welcome, " + first_name + "!\n\n"
         "I am ExamAI — your dedicated tutor for WAEC, NECO and JAMB examinations.\n\n"
-        "What I can do for you:\n"
-        "📚 Step by step topic explanations\n"
-        "🔍 Full past question solutions with workings\n"
-        "✏️ Exam standard practice questions\n"
-        "📋 Complete syllabus breakdown per subject\n"
-        "💡 Exam tips and time management strategies\n"
-        "⚠️ Common examiner traps to avoid\n\n"
-        "First, which exam are you preparing for?",
+        "Here is what I can do for you:\n"
+        "📚 Explain any topic naturally and clearly\n"
+        "🔍 Solve past questions with full workings\n"
+        "✏️ Give you exam standard practice questions\n"
+        "📋 Break down your full subject syllabus\n"
+        "💡 Share proven exam tips and strategies\n"
+        "⚠️ Warn you about common examiner traps\n"
+        "📅 Help you build a realistic study timetable\n\n"
+        "Which exam are you preparing for?",
         reply_markup=exam_keyboard()
     )
 
@@ -154,8 +161,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/syllabus — Full topic list for your subject\n"
         "/tips — Exam tips and technique\n"
         "/traps — Common mistakes to avoid\n"
-        "/timetable — How to build a study timetable\n\n"
-        "Or type any question directly."
+        "/timetable — Build your study plan\n\n"
+        "Or simply type any question directly."
     )
 
 
@@ -179,7 +186,9 @@ async def syllabus_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     exam = USER_EXAMS.get(user_id, "WAEC")
 
     if not subject:
-        await update.message.reply_text("Please select a subject first using /subject")
+        await update.message.reply_text(
+            "Please select a subject first using /subject"
+        )
         return
 
     topics = SYLLABUS.get(subject, [])
@@ -198,27 +207,32 @@ async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     exam = USER_EXAMS.get(user_id, "WAEC")
 
     if not subject:
-        await update.message.reply_text("Please select a subject first using /subject")
+        await update.message.reply_text(
+            "Please select a subject first using /subject"
+        )
         return
 
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    await context.bot.send_chat_action(
+        chat_id=update.effective_chat.id, action="typing"
+    )
 
     quiz_prompt = (
         "Generate one authentic " + exam + " standard multiple choice question on " + subject + ".\n\n"
         "Requirements:\n"
         "- Match the exact difficulty, style and language of real " + exam + " past questions\n"
-        "- Test application and understanding, not just recall\n"
+        "- Test application and deep understanding, not just recall\n"
         "- Use precise academic terminology\n"
         "- Draw strictly from the official " + exam + " " + subject + " syllabus\n"
-        "- Include one clearly correct answer and three plausible distractors\n\n"
-        "Format exactly as follows with no extra text:\n"
+        "- Include one clearly correct answer and three plausible distractors\n"
+        "- Double check that your answer and explanation are mathematically correct\n\n"
+        "Format exactly as follows:\n"
         "QUESTION: [full question text]\n"
         "A) [option A]\n"
         "B) [option B]\n"
         "C) [option C]\n"
         "D) [option D]\n"
-        "ANSWER: [correct letter only, e.g. B]\n"
-        "EXPLANATION: [step by step explanation of why the answer is correct and why others are wrong]"
+        "ANSWER: [correct letter only]\n"
+        "EXPLANATION: [natural conversational explanation of why the answer is correct and why others are wrong, as if talking to the student directly]"
     )
 
     try:
@@ -238,7 +252,10 @@ async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         correct = answer_line.replace("ANSWER:", "").strip() if answer_line else "A"
         explanation = explanation_line.replace("EXPLANATION:", "").strip() if explanation_line else ""
 
-        QUIZ_QUESTIONS[user_id] = {"answer": correct, "explanation": explanation}
+        QUIZ_QUESTIONS[user_id] = {
+            "answer": correct,
+            "explanation": explanation
+        }
 
         question_text = "\n".join([
             l for l in lines
@@ -259,7 +276,9 @@ async def quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     except Exception as e:
         print("QUIZ ERROR: " + str(e))
-        await update.message.reply_text("Could not generate question. Please try again.")
+        await update.message.reply_text(
+            "Could not generate question. Please try again."
+        )
 
 
 async def tips_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -267,7 +286,9 @@ async def tips_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     subject = USER_SUBJECTS.get(user_id, "all subjects")
     exam = USER_EXAMS.get(user_id, "WAEC")
 
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    await context.bot.send_chat_action(
+        chat_id=update.effective_chat.id, action="typing"
+    )
 
     try:
         response = client.chat.completions.create(
@@ -277,9 +298,9 @@ async def tips_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 {"role": "user", "content": (
                     "Give 6 highly specific and practical exam tips for scoring A or B in "
                     + exam + " " + subject + ". "
-                    "Focus on: time management in the exam hall, question selection strategy, "
+                    "Focus on time management in the exam hall, question selection strategy, "
                     "how to structure answers, and how to avoid losing marks unnecessarily. "
-                    "Be direct and specific, not generic."
+                    "Speak directly to the student in a natural encouraging tone. Be specific not generic."
                 )}
             ]
         )
@@ -289,7 +310,9 @@ async def tips_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception as e:
         print("TIPS ERROR: " + str(e))
-        await update.message.reply_text("Could not load tips. Please try again.")
+        await update.message.reply_text(
+            "Could not load tips. Please try again."
+        )
 
 
 async def traps_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -297,7 +320,9 @@ async def traps_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     subject = USER_SUBJECTS.get(user_id, "all subjects")
     exam = USER_EXAMS.get(user_id, "WAEC")
 
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    await context.bot.send_chat_action(
+        chat_id=update.effective_chat.id, action="typing"
+    )
 
     try:
         response = client.chat.completions.create(
@@ -307,24 +332,29 @@ async def traps_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 {"role": "user", "content": (
                     "List the 5 most common mistakes students make in " + exam + " " + subject +
                     " that cost them marks. For each mistake explain what it is, "
-                    "why students make it, and exactly how to avoid it. Be specific and practical."
+                    "why students make it, and exactly how to avoid it. "
+                    "Speak directly to the student naturally and conversationally."
                 )}
             ]
         )
         await update.message.reply_text(
-            "⚠️ Common Mistakes — " + exam + " " + subject + "\n\n" +
+            "⚠️ Watch Out — " + exam + " " + subject + "\n\n" +
             response.choices[0].message.content
         )
     except Exception as e:
         print("TRAPS ERROR: " + str(e))
-        await update.message.reply_text("Could not load this. Please try again.")
+        await update.message.reply_text(
+            "Could not load this. Please try again."
+        )
 
 
 async def timetable_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     exam = USER_EXAMS.get(user_id, "WAEC")
 
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    await context.bot.send_chat_action(
+        chat_id=update.effective_chat.id, action="typing"
+    )
 
     try:
         response = client.chat.completions.create(
@@ -335,17 +365,20 @@ async def timetable_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     "Create a practical and realistic study timetable template for a Nigerian student "
                     "preparing for " + exam + " with 8 subjects over 8 weeks. "
                     "Consider that students may have school during the day and limited electricity at night. "
-                    "Include time for rest and revision. Make it structured and easy to follow."
+                    "Include time for rest and revision. "
+                    "Speak to the student naturally and make it feel achievable and encouraging."
                 )}
             ]
         )
         await update.message.reply_text(
-            "📅 " + exam + " Study Timetable Guide\n\n" +
+            "📅 Your " + exam + " Study Plan\n\n" +
             response.choices[0].message.content
         )
     except Exception as e:
         print("TIMETABLE ERROR: " + str(e))
-        await update.message.reply_text("Could not generate timetable. Please try again.")
+        await update.message.reply_text(
+            "Could not generate timetable. Please try again."
+        )
 
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -368,9 +401,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         USER_SUBJECTS[user_id] = subject
         exam = USER_EXAMS.get(user_id, "WAEC")
         await query.edit_message_text(
-            "Ready. Exam: " + exam + " | Subject: " + subject + "\n\n"
+            "All set! Exam: " + exam + " | Subject: " + subject + "\n\n"
             "You can now:\n"
-            "- Type any question or topic\n"
+            "- Type any question or topic directly\n"
             "/quiz — Practice question\n"
             "/syllabus — Topic list\n"
             "/tips — Exam technique\n"
@@ -384,7 +417,9 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         quiz_data = QUIZ_QUESTIONS.get(user_id)
 
         if not quiz_data:
-            await query.edit_message_text("This quiz has expired. Use /quiz for a new question.")
+            await query.edit_message_text(
+                "This quiz has expired. Use /quiz for a new question."
+            )
             return
 
         correct = quiz_data["answer"]
@@ -392,14 +427,15 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if selected == correct:
             result = (
-                "Correct! Well done.\n\n"
-                "Explanation:\n" + explanation +
+                "Correct! Well done.\n\n" +
+                explanation +
                 "\n\nUse /quiz for another question."
             )
         else:
             result = (
-                "Incorrect. You selected " + selected + ". The correct answer is " + correct + ".\n\n"
-                "Explanation:\n" + explanation +
+                "Not quite — you selected " + selected +
+                " but the correct answer is " + correct + ".\n\n" +
+                explanation +
                 "\n\nStudy this carefully then use /quiz to try again."
             )
 
@@ -414,21 +450,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     subject = USER_SUBJECTS.get(user_id, "")
     exam = USER_EXAMS.get(user_id, "WAEC")
 
-    await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+    await context.bot.send_chat_action(
+        chat_id=update.effective_chat.id, action="typing"
+    )
 
     context_line = ""
     if subject and exam:
-        context_line = first_name + " is preparing for " + exam + " and is currently studying " + subject + ". "
+        context_line = (
+            first_name + " is preparing for " + exam +
+            " and is currently studying " + subject + ". "
+        )
 
     message_prompt = (
         context_line + first_name + " asks: " + student_message + "\n\n"
-        "Respond with:\n"
-        "1. A clear definition or introduction\n"
-        "2. Key principles or theory\n"
-        "3. Step by step working or detailed explanation\n"
-        "4. A worked example if applicable\n"
-        "5. A summary and one key exam point to remember\n"
-        "Keep the response clear and easy to read on a mobile phone."
+        "Teach this naturally as a brilliant tutor sitting beside the student. "
+        "Walk them through the problem conversationally. "
+        "For calculations verify every step twice before responding. "
+        "End with the final answer clearly stated and one key exam point."
     )
 
     try:
@@ -442,7 +480,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(response.choices[0].message.content)
     except Exception as e:
         print("GROQ ERROR: " + str(e))
-        await update.message.reply_text("An error occurred. Please try again.")
+        await update.message.reply_text(
+            "An error occurred. Please try again."
+        )
 
 
 def main():
@@ -457,10 +497,13 @@ def main():
     app.add_handler(CommandHandler("traps", traps_command))
     app.add_handler(CommandHandler("timetable", timetable_command))
     app.add_handler(CallbackQueryHandler(button_handler))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    app.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND, handle_message
+    ))
     print("ExamAI bot is running...")
     app.run_polling()
 
 
 if __name__ == "__main__":
     main()
+ 
