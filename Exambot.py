@@ -11,9 +11,8 @@ from telegram.ext import (
 from groq import Groq
 
 # Your keys — paste them here
-
-TELEGRAM_TOKEN = os.environ.get("8987511434:AAHIWZUzQX68ZWi97Vf0Tz-4jDIiruwP8wU")
-GROQ_API_KEY = os.environ.get("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
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 # Setup Groq
 client = Groq(api_key=GROQ_API_KEY)
