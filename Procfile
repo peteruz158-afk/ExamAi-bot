@@ -1,1 +1,1 @@
-worker: python learnly_bot.py
+worker: python Exambot.py
