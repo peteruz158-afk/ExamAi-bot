@@ -1,1 +1,1 @@
-worker: python waecbot.py
+worker: python learnly_bot.py
